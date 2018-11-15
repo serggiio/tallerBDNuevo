@@ -1,0 +1,65 @@
+-- Function: alm.busqueda_prueba(character varying, character varying, character varying, character varying, integer)
+
+-- DROP FUNCTION alm.busqueda_prueba(character varying, character varying, character varying, character varying, integer);
+
+CREATE OR REPLACE FUNCTION alm.busqueda_prueba(_codigo character varying, _descripcion character varying, _unidad character varying, _ubicacion character varying, _part_p integer)
+  RETURNS refcursor AS
+$BODY$
+DECLARE    
+v_criterio CHARACTER VARYING :=''; 
+oCursor REFCURSOR;
+BEGIN
+v_criterio := 'TRUE';
+
+if(_codigo<>'' or _descripcion<>'' or  _unidad<>'' or _ubicacion<>'' or _part_p>0)then
+	IF ( _codigo <> '' ) THEN            
+          v_criterio  := v_criterio||' AND' ||' codigo LIKE '|| quote_nullable( '%' || _codigo || '%');             
+          --RAISE NOTICE 'DEBUG:: v_criterio: %, codigo %', v_criterio, p_codigo1;                           
+      
+	END IF;
+
+	IF ( _descripcion <> '' ) THEN            
+          v_criterio  := v_criterio||' AND' ||' descripcion LIKE '|| quote_nullable( '%' || _descripcion || '%');             
+          --RAISE NOTICE 'DEBUG:: v_criterio: %, codigo %', v_criterio, p_codigo1;                           
+      
+	END IF;
+
+      IF ( _unidad <> '' ) THEN            
+          v_criterio  := v_criterio||' AND' ||' unidad LIKE '|| quote_nullable( '%' || _unidad || '%');             
+          --RAISE NOTICE 'DEBUG:: v_criterio: %, codigo %', v_criterio, p_codigo1;                           
+      
+      END IF;
+
+      IF ( _ubicacion <> '' ) THEN            
+          v_criterio  := v_criterio||' AND' ||' ubicacion LIKE '|| quote_nullable( '%' || _ubicacion || '%');             
+          --RAISE NOTICE 'DEBUG:: v_criterio: %, codigo %', v_criterio, p_codigo1;                           
+      
+      END IF;
+
+      IF ( _part_p > 0 ) THEN            
+          v_criterio  := v_criterio||' AND' ||' partida_p = '|| _part_p;             
+          --RAISE NOTICE 'DEBUG:: v_criterio: %, codigo %', v_criterio, p_codigo1;                           
+      
+      END IF;
+end if;
+
+OPEN oCursor FOR EXECUTE 
+      'SELECT * FROM
+            alm.items
+      WHERE '||
+        v_criterio::text ||
+    ';';
+         
+  --USING 
+  --  v_limit, v_offset, v_reg_activos.cod_da ; 
+
+  RETURN oCursor; 
+
+
+
+END; 
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION alm.busqueda_prueba(character varying, character varying, character varying, character varying, integer)
+  OWNER TO postgres;
